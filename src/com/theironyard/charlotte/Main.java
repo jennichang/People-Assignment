@@ -1,39 +1,79 @@
 package com.theironyard.charlotte;
 
+import jodd.json.JsonSerializer;
+
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Scanner;
 
 public class Main {
 
-    public static HashMap<String, ArrayList<Person>> map = new HashMap<>();
-    
-    public static void main(String[] args) throws FileNotFoundException {
+    // Method to save json file
+    public static void saveData(HashMap<String, ArrayList<Person>> map) throws IOException {
+        JsonSerializer s = new JsonSerializer();
+        String json = s.include("*").serialize(map);
 
-        // read all the people into memory
+        File f = new File("people.json");
+        FileWriter fw = new FileWriter(f);
+        fw.write(json);
+        fw.close();
+    }
+
+    // Method to read from People.txt file
+    public static HashMap<String, ArrayList<Person>> readFile() throws FileNotFoundException {
+        HashMap<String, ArrayList<Person>> readFromFile = new HashMap<>();
+
+        // read all people from text
         File f = new File("People.txt");
         Scanner fileScanner = new Scanner(f); // scanner that reads from files
+        fileScanner.nextLine(); // added this so it does not read the first line of the text file, which is a header
         while (fileScanner.hasNext()) { // while there is a next token on filescanner to read
             String line = fileScanner.nextLine(); //current line is the next line
             String[] columns = line.split(","); // since our different fields are deliminated by comma
             // make array list (of 6 strings) by that split
             Person personObject = new Person(Integer.valueOf(columns[0]), columns[1], columns[2], columns[3],
-                    columns[4], columns[5]); // why won't int for id work?, b/c the first line were the headers.
-            //had to delete header from txt.  need to figure out how to fix without deleting.
+                    columns[4], columns[5]); // id didn't work at first because of the header line, added nextLine() so
+            // scanner doesn't read first line.
 
             //country in as hashmap key with empty arraylist as value
-            map.putIfAbsent(columns[4], new ArrayList<>()); //if the country is not already in the hashmap, add it and as
-            //its value, put an empty arraylist.
+            readFromFile.putIfAbsent(columns[4], new ArrayList<>()); //if the country is not already in the hashmap,
+            // add it and as its value, put an empty arraylist.
 
-            map.get(columns[4]).add((personObject)); //not too sure how add knows to add based on country though?
-
+            readFromFile.get(columns[4]).add((personObject)); //not too sure how add knows
+            // to add based on country though?  oh, because it's a loop, it's only working with one person per loop
         }
-        for(String key:map.keySet()){  // for every key in the hashamp
-            Collections.sort(map.get(key)); //get the value at the key, and sort
-            System.out.println("[KEY: "+key+" , People: "+map.get(key)); // print out
-        } //IT WORKS. IT WORKS. IT WORKS.
+        return readFromFile;
+    }
+
+    // Method to sort arraylists in hashmap
+
+    public static void sortMap(HashMap<String, ArrayList<Person>> inputMap) {
+        for (String key : inputMap.keySet()) { // for each key in all keys of my map
+            Collections.sort(inputMap.get(key)); //sort the values (arraylists) at that key
+            System.out.println("Key: " + key + "; People: " + inputMap.get(key)); // print hashmap
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+
+        // Read txt file
+        HashMap<String, ArrayList<Person>> map = readFile();
+
+        // Loop and sort
+        sortMap(map);
+
+        // save hashmap
+        Main.saveData(map);
+
 
     }
+
+
 }
 
 
@@ -41,27 +81,5 @@ public class Main {
 
 
 
-/* Note:
-     for each element in array list currently have, look at person, look at country, use country as a key in hash
-     add person to list of people at the hashmap.
 
-     putifabsent a new array list on specific key.
-     putifabset new array list at
 
-     for each read in a person, call putifabset and key would be that person's country and value
-     would be new array list (empty)
-     next line, hashmap.get(persons country), that will get me a new array list, use add method,
-     hasmap.get.person.country.add
-
-            hashmap = data
-
-            data.get() -- return object at key
-            data.get(country) -- get will return value, that will bring back array list
-            data.get(country.add(personObject)
-
-      System.out.println(personArrayList);
-      System.out.println(map);
-
-map.putIfAbsent(columns[4], personArrayList );
-
-*/
