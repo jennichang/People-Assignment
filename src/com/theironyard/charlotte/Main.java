@@ -16,7 +16,7 @@ public class Main {
     // Method to save json file
     public static void saveData(HashMap<String, ArrayList<Person>> map) throws IOException {
         JsonSerializer s = new JsonSerializer();
-        String json = s.include("*").serialize(map);
+        String json = s.include("*").serialize(map); // does s.include("*") mean include all parameters of hashmap?
 
         File f = new File("people.json");
         FileWriter fw = new FileWriter(f);
